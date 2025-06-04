@@ -1,22 +1,30 @@
 use std::env;
-
 use clipboard::{ClipboardContext, ClipboardProvider};
 
 fn main() {
-    let input = env::args().collect::<Vec<String>>()[1..].join(" ");
+    let input = env::args().skip(1).collect::<Vec<String>>().join(" ");
+    let total_width = 63; 
+    let border = "// ================================================================";
 
-    let output = format!(
-        "{}\n{}{}{}\n{}",
-        "    /*//////////////////////////////////////////////////////////////",
-        "    ",
-        (0..(64 - input.len()) / 2).map(|_| " ").collect::<String>(),
-        input.to_uppercase(),
-        "    //////////////////////////////////////////////////////////////*/"
+    let trimmed = if input.len() > total_width {
+        input[..total_width].to_string()
+    } else {
+        input.clone()
+    };
+
+    let padding = (total_width - trimmed.len()) / 2;
+    let extra_space = (total_width - trimmed.len()) % 2; 
+
+    let centered_line = format!(
+        "// │{}{}{}│",
+        " ".repeat(padding),
+        trimmed,
+        " ".repeat(padding + extra_space)
     );
 
-    println!("{}", output); // Print the header to console.
+    let output = format!("{}\n{}\n{}", border, centered_line, border);
+
 
     let mut ctx: ClipboardContext = ClipboardProvider::new().unwrap();
-
-    ctx.set_contents(output).unwrap(); // Copy the header to clipboard.
+    ctx.set_contents(output).unwrap(); 
 }
